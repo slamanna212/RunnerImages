@@ -23,7 +23,7 @@ jobs:
       targets: ${{ steps.select.outputs.targets }}
       has-targets: ${{ steps.select.outputs.has-targets }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -53,7 +53,7 @@ jobs:
       matrix:
         target: ${{ fromJSON(needs.detect-targets.outputs.targets) }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: docker/setup-buildx-action@v4
 
@@ -96,7 +96,7 @@ jobs:
       matrix:
         target: ${{ fromJSON(needs.detect-targets.outputs.targets) }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: docker/setup-buildx-action@v4
 
@@ -130,5 +130,5 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ${{ contains(fromJSON('["slamanna212", "dependabot[bot]"]'), github.actor) && 'rapture-runnerimages' || 'ubuntu-latest' }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: ./scripts/check-runner-freshness.sh
