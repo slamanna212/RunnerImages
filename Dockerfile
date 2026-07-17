@@ -54,7 +54,8 @@ RUN NODE_VERSION="$(node --version | sed 's/^v//')" \
     && mkdir -p "/opt/hostedtoolcache/node/${NODE_VERSION}" \
     && ln -s /usr/local "/opt/hostedtoolcache/node/${NODE_VERSION}/x64" \
     && touch "/opt/hostedtoolcache/node/${NODE_VERSION}/x64.complete" \
-    && chmod -R a+rX /opt/hostedtoolcache \
+    && chown -R runner:docker /opt/hostedtoolcache \
+    && chmod -R u+rwX,go+rX /opt/hostedtoolcache \
     && node --version \
     && npm --version
 USER runner
@@ -124,7 +125,8 @@ RUN apt-get update \
     && mkdir -p "/opt/hostedtoolcache/go/${GO_VERSION}" \
     && ln -s /usr/local/go "/opt/hostedtoolcache/go/${GO_VERSION}/x64" \
     && touch "/opt/hostedtoolcache/go/${GO_VERSION}/x64.complete" \
-    && chmod -R a+rX /opt/hostedtoolcache \
+    && chown -R runner:docker /opt/hostedtoolcache \
+    && chmod -R u+rwX,go+rX /opt/hostedtoolcache \
     && go version \
     && hugo version \
     && tidy -version
