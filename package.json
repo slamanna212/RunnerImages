@@ -3,6 +3,6 @@
   "private": true,
   "description": "Version pins for tools baked into the ARC runner images",
   "devDependencies": {
-    "playwright": "1.58.2"
+    "playwright": "1.61.1"
   }
 }
