@@ -69,6 +69,9 @@ ENV CARGO_HOME=/usr/local/cargo \
     RUSTUP_HOME=/usr/local/rustup \
     PATH=/usr/local/cargo/bin:${PATH}
 
+RUN chown -R runner:docker /usr/local/cargo /usr/local/rustup \
+    && chmod -R u+rwX,go+rX /usr/local/cargo /usr/local/rustup
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
       build-essential \

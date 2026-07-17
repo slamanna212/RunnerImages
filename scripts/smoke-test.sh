@@ -9,7 +9,7 @@ node_toolcache='node_cache=$(find "$RUNNER_TOOL_CACHE/node" -mindepth 2 -maxdept
 
 case "$target" in
   apogee)
-    checks="$common; $node_toolcache; node --version; npm --version; rustc --version; cargo --version; pkg-config --exists webkit2gtk-4.1; dpkg-query -W patchelf rpm zsync"
+    checks="$common; $node_toolcache; node --version; npm --version; rustc --version; cargo --version; cargo_probe=\"\$CARGO_HOME/.runnerimages-write-test\"; mkdir \"\$cargo_probe\"; rmdir \"\$cargo_probe\"; pkg-config --exists webkit2gtk-4.1; dpkg-query -W patchelf rpm zsync"
     ;;
   matchexec)
     checks="$common; $node_toolcache; node --version; npm --version; docker --version; docker buildx version"
