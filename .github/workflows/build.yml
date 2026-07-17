@@ -16,18 +16,42 @@ env:
   IMAGE_PREFIX: ghcr.io/slamanna212/runnerimages
 
 jobs:
+  detect-targets:
+    name: Select image targets
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.select.outputs.targets }}
+      has-targets: ${{ steps.select.outputs.has-targets }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Select changed image targets
+        id: select
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          targets="$(./scripts/select-build-targets.sh "$EVENT_NAME" "$BASE_SHA" "$HEAD_SHA")"
+          echo "targets=$targets" >> "$GITHUB_OUTPUT"
+          if [[ "$targets" == "[]" ]]; then
+            echo "has-targets=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-targets=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Selected targets: $targets"
+
   build-test:
     name: Test ${{ matrix.target }}
+    needs: detect-targets
+    if: needs.detect-targets.outputs.has-targets == 'true'
     runs-on: ${{ contains(fromJSON('["slamanna212", "dependabot[bot]"]'), github.actor) && 'rapture-runnerimages' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - apogee
-          - matchexec
-          - tonysofwestreading
-          - slamanna-com
-          - slamanna-food
+        target: ${{ fromJSON(needs.detect-targets.outputs.targets) }}
     steps:
       - uses: actions/checkout@v6
 
@@ -59,8 +83,8 @@ jobs:
 
   publish:
     name: Publish ${{ matrix.target }}
-    if: github.event_name != 'pull_request'
-    needs: build-test
+    if: github.event_name != 'pull_request' && needs.detect-targets.outputs.has-targets == 'true'
+    needs: [detect-targets, build-test]
     runs-on: ${{ contains(fromJSON('["slamanna212", "dependabot[bot]"]'), github.actor) && 'rapture-runnerimages' || 'ubuntu-latest' }}
     permissions:
       contents: read
@@ -70,12 +94,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - apogee
-          - matchexec
-          - tonysofwestreading
-          - slamanna-com
-          - slamanna-food
+        target: ${{ fromJSON(needs.detect-targets.outputs.targets) }}
     steps:
       - uses: actions/checkout@v6
 

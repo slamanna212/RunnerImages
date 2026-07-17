@@ -31,12 +31,14 @@ docker build --target apogee -t local/runner-apogee:test .
 ./scripts/smoke-test.sh local/runner-apogee:test apogee
 ```
 
-Pull requests build and scan every target. Merges to `main`, the weekly schedule,
-and manual dispatches publish `latest` and immutable workflow-run tags with SBOM
-and provenance attestations. Dependabot maintains container stages, workflow
-actions, the Hugo build dependency, and the Playwright tool pin. Renovate in
-`HomelabArgoCD` pins `latest` to a digest and groups new image digests into a
-reviewable rollout PR.
+Pull requests and pushes build and scan only the targets affected by the changed
+files or Dockerfile stages. Shared-stage changes fan out to every dependent
+target. The weekly schedule and manual dispatches always build all targets.
+Successful non-PR builds publish `latest` and immutable workflow-run tags with
+SBOM and provenance attestations. Dependabot maintains container stages,
+workflow actions, the Hugo build dependency, and the Playwright tool pin.
+Renovate in `HomelabArgoCD` pins `latest` to a digest and groups new image
+digests into a reviewable rollout PR.
 
 The packages must be public so ARC can pull them anonymously. GitHub may create a
 new GHCR package as private on first publication; if so, set its visibility to
