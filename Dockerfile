@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # Keep toolchains in image stages so Dependabot can update them.
-FROM node:24.18.0-bookworm-slim AS node-toolchain
+FROM node:26.5.0-bookworm-slim AS node-toolchain
 FROM golang:1.26.5-bookworm AS go-toolchain
 FROM rust:1.97.0-bookworm AS rust-toolchain
 
