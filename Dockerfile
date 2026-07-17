@@ -48,14 +48,14 @@ FROM runner-base AS node-runner
 
 USER root
 COPY --from=node-toolchain /usr/local/ /usr/local/
-ENV RUNNER_TOOL_CACHE=/opt/hostedtoolcache \
-    AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
+ENV RUNNER_TOOL_CACHE=/home/runner/_tool \
+    AGENT_TOOLSDIRECTORY=/home/runner/_tool
 RUN NODE_VERSION="$(node --version | sed 's/^v//')" \
-    && mkdir -p "/opt/hostedtoolcache/node/${NODE_VERSION}" \
-    && ln -s /usr/local "/opt/hostedtoolcache/node/${NODE_VERSION}/x64" \
-    && touch "/opt/hostedtoolcache/node/${NODE_VERSION}/x64.complete" \
-    && chown -R runner:docker /opt/hostedtoolcache \
-    && chmod -R u+rwX,go+rX /opt/hostedtoolcache \
+    && mkdir -p "/home/runner/_tool/node/${NODE_VERSION}" \
+    && ln -s /usr/local "/home/runner/_tool/node/${NODE_VERSION}/x64" \
+    && touch "/home/runner/_tool/node/${NODE_VERSION}/x64.complete" \
+    && chown -R runner:docker /home/runner/_tool \
+    && chmod -R u+rwX,go+rX /home/runner/_tool \
     && node --version \
     && npm --version
 USER runner
@@ -115,18 +115,18 @@ FROM runner-base AS slamanna-com
 USER root
 COPY --from=go-toolchain /usr/local/go/ /usr/local/go/
 COPY --from=hugo-toolchain /go/bin/hugo /usr/local/bin/hugo
-ENV RUNNER_TOOL_CACHE=/opt/hostedtoolcache \
-    AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache \
+ENV RUNNER_TOOL_CACHE=/home/runner/_tool \
+    AGENT_TOOLSDIRECTORY=/home/runner/_tool \
     PATH=/usr/local/go/bin:${PATH}
 RUN apt-get update \
     && apt-get install -y --no-install-recommends tidy \
     && rm -rf /var/lib/apt/lists/* \
     && GO_VERSION="$(go env GOVERSION | sed 's/^go//')" \
-    && mkdir -p "/opt/hostedtoolcache/go/${GO_VERSION}" \
-    && ln -s /usr/local/go "/opt/hostedtoolcache/go/${GO_VERSION}/x64" \
-    && touch "/opt/hostedtoolcache/go/${GO_VERSION}/x64.complete" \
-    && chown -R runner:docker /opt/hostedtoolcache \
-    && chmod -R u+rwX,go+rX /opt/hostedtoolcache \
+    && mkdir -p "/home/runner/_tool/go/${GO_VERSION}" \
+    && ln -s /usr/local/go "/home/runner/_tool/go/${GO_VERSION}/x64" \
+    && touch "/home/runner/_tool/go/${GO_VERSION}/x64.complete" \
+    && chown -R runner:docker /home/runner/_tool \
+    && chmod -R u+rwX,go+rX /home/runner/_tool \
     && go version \
     && hugo version \
     && tidy -version
