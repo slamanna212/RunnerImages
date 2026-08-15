@@ -44,17 +44,22 @@ RUN apt-get update \
     && docker --version \
     && docker buildx version
 
-# The ARC runner's embedded Node 20 npm 10.8.2 carries vulnerable tar 6.2.1.
-# npm 11.19.0 supports the embedded Node 20.20.2 and carries tar ^7.5.19.
-RUN mkdir -p /tmp/npm-upgrade \
-    && cd /tmp/npm-upgrade \
-    && PATH=/home/runner/externals/node20/bin:${PATH} /home/runner/externals/node20/bin/npm pack npm@11.19.0 \
-    && tar -xzf npm-11.19.0.tgz \
-    && rm -rf /home/runner/externals/node20/lib/node_modules/npm \
-    && mv package /home/runner/externals/node20/lib/node_modules/npm \
-    && cd / \
-    && rm -rf /tmp/npm-upgrade \
-    && PATH=/home/runner/externals/node20/bin:${PATH} /home/runner/externals/node20/bin/npm --version
+# The ARC runner embeds Node 20/npm 10.8.2 and Node 24/npm 11.16.0.
+# Their bundled tar ranges resolve to vulnerable releases. npm 11.19.0 supports
+# both embedded Node versions and requires tar ^7.5.19.
+RUN for node_major in 20 24; do \
+      mkdir -p "/tmp/npm-upgrade-${node_major}"; \
+      cd "/tmp/npm-upgrade-${node_major}"; \
+      PATH="/home/runner/externals/node${node_major}/bin:${PATH}" \
+        "/home/runner/externals/node${node_major}/bin/npm" pack npm@11.19.0; \
+      tar -xzf npm-11.19.0.tgz; \
+      rm -rf "/home/runner/externals/node${node_major}/lib/node_modules/npm"; \
+      mv package "/home/runner/externals/node${node_major}/lib/node_modules/npm"; \
+      cd /; \
+      rm -rf "/tmp/npm-upgrade-${node_major}"; \
+      PATH="/home/runner/externals/node${node_major}/bin:${PATH}" \
+        "/home/runner/externals/node${node_major}/bin/npm" --version; \
+    done
 
 FROM runner-base AS node-runner
 
