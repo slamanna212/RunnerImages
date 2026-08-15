@@ -52,6 +52,7 @@ RUN mkdir -p /tmp/npm-upgrade \
     && tar -xzf npm-11.19.0.tgz \
     && rm -rf /home/runner/externals/node20/lib/node_modules/npm \
     && mv package /home/runner/externals/node20/lib/node_modules/npm \
+    && cd / \
     && rm -rf /tmp/npm-upgrade \
     && PATH=/home/runner/externals/node20/bin:${PATH} /home/runner/externals/node20/bin/npm --version
 
