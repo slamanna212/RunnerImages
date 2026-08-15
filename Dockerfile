@@ -67,6 +67,12 @@ USER root
 COPY --from=node-toolchain /usr/local/ /usr/local/
 ENV RUNNER_TOOL_CACHE=/home/runner/_tool \
     AGENT_TOOLSDIRECTORY=/home/runner/_tool
+
+# Keep the supported project runtime on Node 24 while replacing its bundled npm
+# dependency graph with npm 11.19.0 (tar ^7.5.19).
+RUN npm install --global npm@11.19.0 \
+    && npm --version
+
 RUN NODE_VERSION="$(node --version | sed 's/^v//')" \
     && mkdir -p "/home/runner/_tool/node/${NODE_VERSION}" \
     && ln -s /usr/local "/home/runner/_tool/node/${NODE_VERSION}/x64" \
