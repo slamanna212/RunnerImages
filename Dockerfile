@@ -44,15 +44,24 @@ RUN apt-get update \
     && docker --version \
     && docker buildx version
 
+# The ARC runner's embedded Node 20 npm 10.8.2 carries vulnerable tar 6.2.1.
+# npm 11.19.0 supports the embedded Node 20.20.2 and carries tar ^7.5.19.
+RUN mkdir -p /tmp/npm-upgrade \
+    && cd /tmp/npm-upgrade \
+    && /home/runner/externals/node20/bin/npm pack npm@11.19.0 \
+    && tar -xzf npm-11.19.0.tgz \
+    && rm -rf /home/runner/externals/node20/lib/node_modules/npm \
+    && mv package /home/runner/externals/node20/lib/node_modules/npm \
+    && rm -rf /tmp/npm-upgrade \
+    && /home/runner/externals/node20/bin/npm --version
+
 FROM runner-base AS node-runner
 
 USER root
 COPY --from=node-toolchain /usr/local/ /usr/local/
 ENV RUNNER_TOOL_CACHE=/home/runner/_tool \
     AGENT_TOOLSDIRECTORY=/home/runner/_tool
-# npm 12.0.2 supports Node 24 and replaces the vulnerable bundled tar 6.x.
-RUN npm install --global npm@12.0.2 \
-    && NODE_VERSION="$(node --version | sed 's/^v//')" \
+RUN NODE_VERSION="$(node --version | sed 's/^v//')" \
     && mkdir -p "/home/runner/_tool/node/${NODE_VERSION}" \
     && ln -s /usr/local "/home/runner/_tool/node/${NODE_VERSION}/x64" \
     && touch "/home/runner/_tool/node/${NODE_VERSION}/x64.complete" \
