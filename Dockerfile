@@ -13,7 +13,7 @@ RUN CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo \
 
 # GitHub's supported ARC image supplies the runner, container hooks, Docker CLI,
 # Buildx, runner user (UID 1001), and /home/runner/run.sh contract.
-FROM ghcr.io/actions/actions-runner:2.335.1@sha256:08c30b0a7105f64bddfc485d2487a22aa03932a791402393352fdf674bda2c29 AS runner-base
+FROM ghcr.io/actions/actions-runner:2.336.0@sha256:0cfdcc701ce933c6d243c6b0b2da767366dc9f2e99961d4c3754b0b78084cdda AS runner-base
 
 USER root
 
@@ -44,12 +44,35 @@ RUN apt-get update \
     && docker --version \
     && docker buildx version
 
+# The ARC runner embeds Node 20/npm 10.8.2 and Node 24/npm 11.16.0.
+# Their bundled tar ranges resolve to vulnerable releases. npm 11.19.0 supports
+# both embedded Node versions and requires tar ^7.5.19.
+RUN for node_major in 20 24; do \
+      mkdir -p "/tmp/npm-upgrade-${node_major}"; \
+      cd "/tmp/npm-upgrade-${node_major}"; \
+      PATH="/home/runner/externals/node${node_major}/bin:${PATH}" \
+        "/home/runner/externals/node${node_major}/bin/npm" pack npm@11.19.0; \
+      tar -xzf npm-11.19.0.tgz; \
+      rm -rf "/home/runner/externals/node${node_major}/lib/node_modules/npm"; \
+      mv package "/home/runner/externals/node${node_major}/lib/node_modules/npm"; \
+      cd /; \
+      rm -rf "/tmp/npm-upgrade-${node_major}"; \
+      PATH="/home/runner/externals/node${node_major}/bin:${PATH}" \
+        "/home/runner/externals/node${node_major}/bin/npm" --version; \
+    done
+
 FROM runner-base AS node-runner
 
 USER root
 COPY --from=node-toolchain /usr/local/ /usr/local/
 ENV RUNNER_TOOL_CACHE=/home/runner/_tool \
     AGENT_TOOLSDIRECTORY=/home/runner/_tool
+
+# Keep the supported project runtime on Node 24 while replacing its bundled npm
+# dependency graph with npm 11.19.0 (tar ^7.5.19).
+RUN npm install --global npm@11.19.0 \
+    && npm --version
+
 RUN NODE_VERSION="$(node --version | sed 's/^v//')" \
     && mkdir -p "/home/runner/_tool/node/${NODE_VERSION}" \
     && ln -s /usr/local "/home/runner/_tool/node/${NODE_VERSION}/x64" \
