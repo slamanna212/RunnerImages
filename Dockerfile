@@ -13,7 +13,7 @@ RUN CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo \
 
 # GitHub's supported ARC image supplies the runner, container hooks, Docker CLI,
 # Buildx, runner user (UID 1001), and /home/runner/run.sh contract.
-FROM ghcr.io/actions/actions-runner:2.335.1@sha256:08c30b0a7105f64bddfc485d2487a22aa03932a791402393352fdf674bda2c29 AS runner-base
+FROM ghcr.io/actions/actions-runner:2.336.0@sha256:0cfdcc701ce933c6d243c6b0b2da767366dc9f2e99961d4c3754b0b78084cdda AS runner-base
 
 USER root
 
@@ -50,7 +50,9 @@ USER root
 COPY --from=node-toolchain /usr/local/ /usr/local/
 ENV RUNNER_TOOL_CACHE=/home/runner/_tool \
     AGENT_TOOLSDIRECTORY=/home/runner/_tool
-RUN NODE_VERSION="$(node --version | sed 's/^v//')" \
+# npm 12.0.2 supports Node 24 and replaces the vulnerable bundled tar 6.x.
+RUN npm install --global npm@12.0.2 \
+    && NODE_VERSION="$(node --version | sed 's/^v//')" \
     && mkdir -p "/home/runner/_tool/node/${NODE_VERSION}" \
     && ln -s /usr/local "/home/runner/_tool/node/${NODE_VERSION}/x64" \
     && touch "/home/runner/_tool/node/${NODE_VERSION}/x64.complete" \
