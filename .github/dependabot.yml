@@ -6,6 +6,12 @@ updates:
       interval: weekly
     labels:
       - dependencies
+    # All hosted workloads are standardized on Node 24. Keep receiving
+    # compatible 24.x updates but do not propose a new Node major here.
+    ignore:
+      - dependency-name: node
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
