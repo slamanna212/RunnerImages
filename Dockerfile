@@ -48,7 +48,7 @@ RUN apt-get update \
 # npm 11.19.0 supports the embedded Node 20.20.2 and carries tar ^7.5.19.
 RUN mkdir -p /tmp/npm-upgrade \
     && cd /tmp/npm-upgrade \
-    && /home/runner/externals/node20/bin/npm pack npm@11.19.0 \
+    && PATH=/home/runner/externals/node20/bin:${PATH} /home/runner/externals/node20/bin/npm pack npm@11.19.0 \
     && tar -xzf npm-11.19.0.tgz \
     && rm -rf /home/runner/externals/node20/lib/node_modules/npm \
     && mv package /home/runner/externals/node20/lib/node_modules/npm \
