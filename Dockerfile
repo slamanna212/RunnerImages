@@ -53,7 +53,7 @@ RUN mkdir -p /tmp/npm-upgrade \
     && rm -rf /home/runner/externals/node20/lib/node_modules/npm \
     && mv package /home/runner/externals/node20/lib/node_modules/npm \
     && rm -rf /tmp/npm-upgrade \
-    && /home/runner/externals/node20/bin/npm --version
+    && PATH=/home/runner/externals/node20/bin:${PATH} /home/runner/externals/node20/bin/npm --version
 
 FROM runner-base AS node-runner
 
