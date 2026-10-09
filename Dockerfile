@@ -13,7 +13,7 @@ RUN CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo \
 
 # GitHub's supported ARC image supplies the runner, container hooks, Docker CLI,
 # Buildx, runner user (UID 1001), and /home/runner/run.sh contract.
-FROM ghcr.io/actions/actions-runner:2.336.0@sha256:0cfdcc701ce933c6d243c6b0b2da767366dc9f2e99961d4c3754b0b78084cdda AS runner-base
+FROM ghcr.io/actions/actions-runner:2.338.0@sha256:4ffadc0002b2581327e06101fc8c06cd189232baf79fe561fac9caeb76f5e807 AS runner-base
 
 USER root
 
